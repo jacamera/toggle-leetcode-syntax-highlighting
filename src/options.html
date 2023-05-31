@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <title>Toggle LeetCode Syntax Highlighting</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            html {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                font-size: 16pt;
+                font-family: sans-serif;
+                background: #f6f6f6;
+            }
+            h1 {
+                font-size: 18pt;
+                margin: 1em;
+            }
+            h2 {
+                font-size: 16pt;
+                margin: 1em;
+            }
+            p {
+                margin: 1em;
+            }
+            strong {
+                font-size: 18pt;
+            }
+            img {
+                width: 48px;
+                height: 48px;
+                vertical-align: middle;
+                margin-right: 0.5em;
+            }
+            .form {
+                max-width: 500px;
+                margin: 1.5em auto;
+                text-align: left;
+                border-radius: 0.5em;
+                overflow: auto;
+                background: #eee;
+            }
+            .fieldset {
+                margin: 1em;
+            }
+            .legend {
+                margin-bottom: 0.5em;
+                font-weight: bold;
+            }
+            .details {
+                margin: 0.5em 0;
+                font-size: smaller;
+                color: #444;
+            }
+            table {
+                border-collapse: collapse;
+            }
+            th {
+                font-weight: normal;
+                padding-right: 1em;
+            }
+            tr + tr th,
+            tr + tr td {
+                padding-top: 0.5em;
+            }
+            @media (prefers-color-scheme: dark) {
+                html {
+                    background: #111;
+                    color: #f8f8f8;
+                }
+                a {
+                    color: dodgerblue;
+                }
+                .form {
+                    background: #333;
+                }
+                .details {
+                    color: #bbb;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <h1><img src="./icon-128.png" alt="Extension Logo" /> Toggle LeetCode Syntax Highlighting</h1>
+        <div id="install-greeting" style="display:none;">
+            <p>Thank you for installing the extension!</p>
+            <p>The default options have been loaded. You can change them at any time by visiting the extension options page.</p>
+        </div>
+        <h2>Extension Options</h2>
+        <div class="form">
+            <div class="fieldset">
+                <div class="legend">Font Colors</div>
+                <div class="details">The font colors used for text in the code editor when syntax highlighting is disabled. The "Light Mode" or "Dark Mode" color is used depending on your LeetCode theme preference.</div>
+                <table>
+                    <tr>
+                        <th>
+                            <label for="light-mode-color-picker">Light Mode</label>
+                        </th>
+                        <td>
+                            <input id="light-mode-color-picker" type="color" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <label for="dark-mode-color-picker">Dark Mode</label>
+                        </th>
+                        <td>
+                            <input id="dark-mode-color-picker" type="color" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="fieldset">
+                <a id="restore-defaults-link" href="#">Restore Defaults</a>
+            </div>
+        </div>
+        <p>Try it out on a <a href="https://leetcode.com/problemset/all/" target="_blank">LeetCode problem</a> now!</p>
+        <p>If you experience any problems please <a href="https://github.com/jacamera/toggle-leetcode-syntax-highlighting/issues" target="_blank">open an issue on Github</a> before leaving a negative review.</p>
+        <script src="./options.js"></script>
+    </body>
+</html>
