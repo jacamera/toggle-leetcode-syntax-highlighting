@@ -4,6 +4,8 @@
 
 This browser extension adds a toggle button to the LeetCode code editor that turns the syntax highlighting feature on and off.
 
+**Compatibility Note:** This extension only works on non-contest problems on leetcode.com. It is not compatible with the editors used during contests and on the leetcode.cn site.
+
 ### Background
 
 It may be desirable to practice writing code without syntax highlighting in order to prepare for an interview or other situation where that feature may not be available. The LeetCode code editor provides many features and customization via user preferences but there is currently no option to disable the syntax highlighting feature.
