@@ -12,7 +12,7 @@ It may be desirable to practice writing code without syntax highlighting in orde
 
 ## How to Use the Extension
 
-Just install the extension from the [Chrome](https://chrome.google.com/webstore/detail/) or [Firefox](https://addons.mozilla.org/en-US/firefox/addon/) stores. Once installed, the extension works automatically. When you view a problem on the LeetCode website the extension will add a "Highlight" button to the right of the "Auto" button in the code editor's upper toolbar. The "Highlight" button works similarly to the "Auto" button in that clicking the button will toggle the state of the syntax highlighting feature of the editor in the current tab and will also store the current state as a preference that will be applied to the editor on the next page load.
+Just install the extension from the [Chrome](https://chrome.google.com/webstore/detail/toggle-leetcode-syntax-hi/ikcblehlkigjhjookmolcdhehlamnbmp) or [Firefox](https://addons.mozilla.org/en-US/firefox/addon/leetcode-syntax-highlighting/) stores. Once installed, the extension works automatically. When you view a problem on the LeetCode website the extension will add a "Highlight" button to the right of the "Auto" button in the code editor's upper toolbar. The "Highlight" button works similarly to the "Auto" button in that clicking the button will toggle the state of the syntax highlighting feature of the editor in the current tab and will also store the current state as a preference that will be applied to the editor on the next page load.
 
 By default the "Highlight" button will not be added to LeetCode contest web pages. You can override this behavior and also set your own custom monochromatic font colors by visiting the extension's options page.
 
