@@ -4,6 +4,8 @@
 
 This browser extension adds a toggle button to the LeetCode code editor that turns the syntax highlighting feature on and off.
 
+![Syntax Highlighting Turned Off in Dark Mode](stores/01-dark-mode-off.png)
+
 **Compatibility Note:** This extension only works on non-contest problems on leetcode.com. It is not compatible with the editors used during contests and on the leetcode.cn site.
 
 ## Background
