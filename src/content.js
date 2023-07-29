@@ -81,14 +81,19 @@ function insertStyleSheet(options, tooltipXOffset) {
 }
 
 // Listen for dynamically added elements.
-function waitForChild(parent, isMatch) {
+function getDynamicElement(parent, query) {
+	const match = query(parent);
+	if (match) {
+		return Promise.resolve(match);
+	}
 	return new Promise(resolve => {
 		const observer = new MutationObserver(records => {
 			for (const record of records) {
 				for (const node of record.addedNodes) {
-					if (isMatch(node)) {
+					const match = query(node);
+					if (match) {
 						observer.disconnect();
-						resolve(node);
+						resolve(match);
 						return;
 					}
 				}
@@ -104,34 +109,17 @@ function waitForChild(parent, isMatch) {
 // The main initialization function.
 async function initialize(editor) {
 	// Find the autocomplete button that we'll clone for our highlight button.
-	function findAutoButton(element) {
-		const buttons = element.getElementsByTagName('button');
+	const autoButton = await getDynamicElement(editor, node => {
+		const buttons = node.getElementsByTagName('button');
 		for (const button of buttons) {
 			if (button.textContent.trim() === autoButtonText) {
 				return button;
 			}
 		}
-	}
-	function getAutoContainer(autoButton) {
-		let autoContainer = autoButton;
-		while (autoContainer.parentElement.getElementsByTagName('button').length === 1) {
-			autoContainer = autoContainer.parentElement;
-		}
-		return autoContainer;
-	}
-	let
-		autoButton = findAutoButton(editor),
-		autoContainer;
-	if (autoButton) {
-		autoContainer = getAutoContainer(autoButton);
-	} else {
-		const toolbar = await waitForChild(editor, node => node.classList?.contains('bg-layer-2'));
-		autoButton = findAutoButton(toolbar);
-		if (autoButton) {
-			autoContainer = getAutoContainer(autoButton);
-		} else {
-			autoContainer = await waitForChild(toolbar, node => autoButton = findAutoButton(node));
-		}
+	});
+	let autoContainer = autoButton;
+	while (autoContainer.parentElement.getElementsByTagName('button').length === 1) {
+		autoContainer = autoContainer.parentElement;
 	}
 
 	// Clone the autocomplete button container and use it for our highlight button.
@@ -228,10 +216,5 @@ async function initialize(editor) {
 }
 
 // Find and initialize the code editor.
-const editor = document.getElementById(editorId);
-if (editor) {
-	initialize(editor);
-} else {
-	waitForChild(document.body, node => node.id === editorId)
-		.then(initialize);
-}
+getDynamicElement(document.body, _ => document.getElementById(editorId))
+	.then(initialize);
