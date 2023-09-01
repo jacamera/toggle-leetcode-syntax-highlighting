@@ -14,10 +14,9 @@ const
 // Button state transitions.
 const
 	buttonClasses = [
-		['text-label-2', 'text-brand-orange'],
-		['dark:text-dark-label-2', 'dark:text-dark-brand-orange'],
-		['hover:text-label-1', 'hover:opacity-80'],
-		['dark:hover:text-dark-label-1', '']
+		['text-text-secondary', 'text-brand-orange'],
+		['dark:text-text-secondary', 'dark:text-dark-brand-orange'],
+		['', 'hover:opacity-80']
 	],
 	buttonIndicatorClasses = [
 		['bg-gray-6', 'bg-brand-orange'],
