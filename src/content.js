@@ -80,45 +80,63 @@ function insertStyleSheet(options, tooltipXOffset) {
 }
 
 // Listen for dynamically added elements.
-function getDynamicElement(parent, query) {
-	const match = query(parent);
-	if (match) {
-		return Promise.resolve(match);
-	}
-	return new Promise(resolve => {
-		const observer = new MutationObserver(records => {
-			for (const record of records) {
-				for (const node of record.addedNodes) {
-					const match = query(node);
-					if (match) {
-						observer.disconnect();
-						resolve(match);
-						return;
-					}
+// Additional nested dynamic element queries may be required before knowing whether or not we have the correct element so disconnecting the observers must be deferred until we have all our elements.
+// Check the array before firing the callback. If it has been cleared then the observers have all been disconnected and no more callbacks should be fired.
+const mutationObservers = [];
+function getDynamicElement(parent, query, callback) {
+	const observer = new MutationObserver(records => {
+		for (const record of records) {
+			for (const node of record.addedNodes) {
+				const match = query(node);
+				if (match && mutationObservers.length) {
+					callback(match);
 				}
 			}
-		});
-		observer.observe(parent, {
-			subtree: true,
-			childList: true
-		});
+		}
 	});
+	observer.observe(parent, {
+		subtree: true,
+		childList: true
+	});
+	mutationObservers.push(observer);
+	const match = query(parent);
+	if (match && mutationObservers.length) {
+		callback(match);
+	}
 }
 
 // The main initialization function.
 async function initialize(editor) {
 	// Find the autocomplete button that we'll clone for our highlight button.
-	const autoButton = await getDynamicElement(editor, node => {
-		const buttons = node.getElementsByTagName('button');
-		for (const button of buttons) {
-			if (button.textContent.trim() === autoButtonText) {
-				return button;
-			}
-		}
+	const autoButton = await new Promise(resolve => {
+		getDynamicElement(
+			editor,
+			node => {
+				const buttons = node.getElementsByTagName('button');
+				for (const button of buttons) {
+					if (button.textContent.trim() === autoButtonText) {
+						return button;
+					}
+				}
+			},
+			resolve
+		);
 	});
 	let autoContainer = autoButton;
 	while (autoContainer.parentElement.getElementsByTagName('button').length === 1) {
 		autoContainer = autoContainer.parentElement;
+	}
+
+	// Guard against duplicate invocations. This shouldn't happen, but if we get here and the mutation observers have already been cleared then an observer may have fired its callback for multiple matching elements.
+	if (!mutationObservers.length) {
+		return;
+	}
+
+	// Disconnect our mutation observers now that we found all our dynamic elements.
+	while (mutationObservers.length) {
+		mutationObservers
+			.pop()
+			.disconnect();
 	}
 
 	// Clone the autocomplete button container and use it for our highlight button.
@@ -215,5 +233,4 @@ async function initialize(editor) {
 }
 
 // Find and initialize the code editor.
-getDynamicElement(document.body, _ => document.getElementById(editorId))
-	.then(initialize);
+getDynamicElement(document.body, node => node.querySelector('#' + editorId), initialize);
