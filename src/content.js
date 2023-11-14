@@ -62,7 +62,7 @@ function insertCssRules(styleSheet, rules) {
 function insertStyleSheet(options, tooltipXOffset) {
 	const rules = [
 		`body.${highlightOffClass} .monaco-editor .view-lines span { color: ${options.lightModeTextColor}; }`,
-		`html[data-theme="dark"] body.${highlightOffClass} .monaco-editor .view-lines span { color: ${options.darkModeTextColor}; }`,
+		`html.dark body.${highlightOffClass} .monaco-editor .view-lines span { color: ${options.darkModeTextColor}; }`,
 		// The !important declaration is necessary to override both the default element attribute and also our own element attribute assigned in the autocomplete button's mouseenter handler.
 		`body.${buttonHoverClass} ${tooltipSelector} { font-size: 0; transform: translateX(${tooltipXOffset}px) !important; }`,
 		`body.${buttonHoverClass} ${tooltipSelector}::after { font-size: var(--chakra-fontSizes-sm); content: "${highlightButtonTooltipText}" }`
