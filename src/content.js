@@ -4,7 +4,7 @@ const
 	buttonHoverClass = cssClassNamespace + '_button-hover',
 	highlightOffClass = cssClassNamespace + '_highlight-off',
 	editorId = 'editor',
-	tooltipSelector = 'div[role="tooltip"]',
+	tooltipSelector = 'div[data-radix-popper-content-wrapper]',
 	autoButtonText = 'Auto',
 	highlightButtonText = 'Highlight',
 	highlightButtonTooltipText = 'Syntax highlighting.',
@@ -63,9 +63,9 @@ function insertStyleSheet(options, tooltipXOffset) {
 	const rules = [
 		`body.${highlightOffClass} .monaco-editor .view-lines span { color: ${options.lightModeTextColor}; }`,
 		`html.dark body.${highlightOffClass} .monaco-editor .view-lines span { color: ${options.darkModeTextColor}; }`,
-		// The !important declaration is necessary to override both the default element attribute and also our own element attribute assigned in the autocomplete button's mouseenter handler.
-		`body.${buttonHoverClass} ${tooltipSelector} { font-size: 0; transform: translateX(${tooltipXOffset}px) !important; }`,
-		`body.${buttonHoverClass} ${tooltipSelector}::after { font-size: var(--chakra-fontSizes-sm); content: "${highlightButtonTooltipText}" }`
+		`body.${buttonHoverClass} ${tooltipSelector} > div { position: relative; left: ${tooltipXOffset}px; }`,
+		`body.${buttonHoverClass} ${tooltipSelector} > div > div { font-size: 0; }`,
+		`body.${buttonHoverClass} ${tooltipSelector} > div > div::after { font-size: 0.75rem; line-height: 0; vertical-align: middle; content: "${highlightButtonTooltipText}" }`
 	];
 	// For some reason iterating adoptedStyleSheets doesn't work in Firefox.
 	if (Symbol.iterator in document.adoptedStyleSheets) {
@@ -160,30 +160,50 @@ async function initialize(editor) {
 	}
 
 	// Set up the button event handlers for tooltip highjacking and highlight toggling.
-	let tooltipTimeout;
+	let
+		tooltipTimeout,
+		closeEvent;
+	function startTooltipTimeout(delayClose) {
+		if (!delayClose) {
+			closeTooltip();
+		}
+		tooltipTimeout = setTimeout(() => {
+			tooltipTimeout = null;
+			if (delayClose) {
+				startTooltipTimeout(false);
+			} else {
+				removeTooltipHijackStyle();
+			}
+		}, delayClose ? 250 : 150);
+	}
 	function cancelTooltipTimeout() {
 		clearTimeout(tooltipTimeout);
 		tooltipTimeout = null;
 	}
-	highlightButton.addEventListener('mouseenter', () => {
+	function closeTooltip() {
+		closeEvent = new PointerEvent('pointerout', { bubbles: true });
+		autoButton.dispatchEvent(closeEvent);
+	}
+	function removeTooltipHijackStyle() {
+		document.body.classList.remove(buttonHoverClass);
+	}
+	highlightButton.addEventListener('pointerenter', () => {
+		// Set the hijacked tooltip styling.
 		document.body.classList.add(buttonHoverClass);
-		editor.dispatchEvent(
-			new MouseEvent('mouseout', {
-				bubbles: true,
-				relatedTarget: autoButton,
-				toElement: autoButton
-			})
-		);
+		// Keep the tooltip open if it's closing or trigger it to open.
+		if (tooltipTimeout) {
+			cancelTooltipTimeout();
+		} else {
+			autoButton.dispatchEvent(new PointerEvent('pointermove', { bubbles: true }));
+		}
+	});
+	highlightButton.addEventListener('pointerleave', event => {
+		// Handle closing the tooltip from this event.
 		if (tooltipTimeout) {
 			cancelTooltipTimeout();
 		}
-	});
-	highlightButton.addEventListener('mouseleave', () => {
-		autoButton.parentElement.dispatchEvent(new MouseEvent('mouseleave'));
-		tooltipTimeout = setTimeout(() => {
-			document.body.classList.remove(buttonHoverClass);
-			tooltipTimeout = null;
-		}, 150);
+		// Delay closing the tooltip if we're moving left towards the auto button.
+		startTooltipTimeout(event.offsetX < 0);
 	});
 	highlightButton.addEventListener('click', async () => {
 		if (document.body.classList.contains(highlightOffClass)) {
@@ -200,21 +220,27 @@ async function initialize(editor) {
 			});
 		}
 	});
-	autoButton.addEventListener('mouseenter', () => {
-		if (!tooltipTimeout) {
-			return;
-		}
-		cancelTooltipTimeout();
+	autoButton.addEventListener('pointerenter', () => {
+		// Revert the hijacked tooltip styling.
 		document.body.classList.remove(buttonHoverClass);
-		const tooltip = document.querySelector(tooltipSelector);
-		if (!tooltip) {
-			return;
+		// Keep the tooltip open.
+		if (tooltipTimeout) {
+			cancelTooltipTimeout();
 		}
-		const
-			tooltipRect = tooltip.getBoundingClientRect(),
-			autoRect = autoButton.getBoundingClientRect(),
-			tooltipX = autoRect.x - (tooltipRect.width - autoRect.width) / 2;
-		tooltip.style.transform = `translateX(${tooltipRect.x - tooltipX}px)`;
+	});
+	autoButton.addEventListener('pointerout', event => {
+		// Only allow our synthetic event to bubble up and close the tooltip.
+		if (event !== closeEvent) {
+			event.stopPropagation();
+		}
+	});
+	autoButton.addEventListener('pointerleave', event => {
+		// Handle closing the tooltip from this event.
+		if (tooltipTimeout) {
+			cancelTooltipTimeout();
+		}
+		// Delay closing the tooltip if we're moving right towards the highlight button.
+		startTooltipTimeout(event.offsetX > autoButton.offsetWidth);
 	});
 
 	// Append the highlight button container to the autocomplete button container's parent.
