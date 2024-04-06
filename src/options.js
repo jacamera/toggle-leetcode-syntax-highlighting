@@ -10,6 +10,21 @@ async function beginOnboarding() {
   // Show the options content.
   permissionPrompt.style.display = "none";
   optionsContent.style.display = "";
+
+  // Manually inject the content script into existing tabs.
+  for (const script of manifest.content_scripts) {
+    for (const pattern of script.matches) {
+      const tabs = await chrome.tabs.query({ url: pattern });
+      for (const tab of tabs) {
+        await chrome.scripting.executeScript({
+          target: {
+            tabId: tab.id,
+          },
+          files: script.js,
+        });
+      }
+    }
+  }
 }
 
 chrome.permissions.contains(permissions).then(async (hasPermissions) => {
