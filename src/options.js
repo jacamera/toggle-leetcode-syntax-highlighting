@@ -1,4 +1,34 @@
-// Constants.
+// Some browsers treat required host permissions as optional so we need to verify that we have permission.
+const manifest = chrome.runtime.getManifest(),
+  permissions = {
+    origins: manifest.host_permissions,
+  },
+  permissionPrompt = document.getElementById("permission-prompt"),
+  optionsContent = document.getElementById("options-content");
+
+async function beginOnboarding() {
+  // Show the options content.
+  permissionPrompt.style.display = "none";
+  optionsContent.style.display = "";
+}
+
+chrome.permissions.contains(permissions).then(async (hasPermissions) => {
+  if (hasPermissions) {
+    await beginOnboarding();
+  } else {
+    // Request permissions.
+    permissionPrompt.style.display = "";
+    document
+      .getElementById("permission-button")
+      .addEventListener("click", async () => {
+        if (await chrome.permissions.request(permissions)) {
+          await beginOnboarding();
+        }
+      });
+  }
+});
+
+// Options constants.
 const optionsKey = "options",
   defaultOptionsKey = "defaultOptions";
 
